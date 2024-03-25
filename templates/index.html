@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User App - FastAPI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+</head>
+<body>
+    <div style="margin-top: 50px;" class="ui container">
+        <h1 class="ui center aligned header">Mini project</h1>
+        <form action="/search">
+            <div class="ui secondary pointing menu">
+                <a class="active item" href="/">
+                  Home
+                </a>
+                <a class="item" href="testify">
+                  Search
+                </a>
+                <a class="item" href="detect">
+                    detect
+                </a>
+            </div>
+              <br/>
+        </form>
+        <form enctype="multipart/form-data" class="ui form" action="/add" method="post">
+            <div class="field">
+                <label>User list</label>
+                <input type="file" name="image" id="imageInput">
+                <input type="text" name="user_name" id="userName" placeholder="User name">
+            </div>
+            <button class="ui blue button" type="submit">Add</button>
+        </form>
+        <hr>
+        {% for user in users %}
+        <div class="ui segment">
+            <p class="ui big header">
+                <div class="ui small image">
+                    <img src="{{user.user_image}}">
+                </div>
+                {{ user.user_id }} | {{ user.user_name }}
+            </p>
+            <a class="ui red button" href="/delete/{{ user.user_id }}">Delete</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        document.getElementById('imageInput').addEventListener('change', function() {
+            const fullPath = this.value;
+            const fileName = fullPath.split('\\').pop().split('/').pop(); // 파일 경로에서 파일 이름 추출
+            const fileNameWithoutExtension = fileName.split('.').slice(0, -1).join('.'); // 확장자를 제거한 파일 이름
+            const userNameInput = document.getElementById('userName');
+            userNameInput.value = fileNameWithoutExtension; // 파일 이름을 username 입력란에 설정
+        });
+    </script>
+</body>
+</html>

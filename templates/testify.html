@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User App - FastAPI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+    <style>
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div style="margin-top: 50px;" class="ui container">
+        <h1 class="ui center aligned header">Mini project</h1>
+        <form action="/testify">
+            <div class="ui secondary pointing menu">
+                <a class="item" href="/">
+                  Home
+                </a>
+                <a class="active item" href="testify">
+                  Search
+                </a>
+                <a class="item" href="detect">
+                  detect
+                </a>
+            </div>
+        </form>
+        <div class="ui segment">
+            <p class="ui big header">
+               <div class="ui small image">
+                    <video id="video" width="320" height="240" autoplay></video>
+                </div>
+            </p>
+            <p class="ui big header">
+                <div class="ui small image">
+                    <canvas id="canvas" width="320" height="240"></canvas>
+                </div>
+            </p>
+        </div>
+        <div id="controls">
+            <button type="button" id="webcamBtn">캡쳐하기</button>
+            <input type="text" id="fileName" placeholder="username">
+            <button type="button" id="saveBtn">저장하기</button>
+        </div>
+    </div>
+
+    <script>
+        const webcamBtn = document.getElementById('webcamBtn');
+        const fileNameInput = document.getElementById('fileName');
+        const saveBtn = document.getElementById('saveBtn');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const video = document.getElementById("video");
+    
+        // Access webcam
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                })
+                .catch(error => {
+                    console.error('Error accessing webcam:', error);
+                });
+        }
+    
+        // Capture image from webcam
+        webcamBtn.addEventListener('click', function () {
+            context.drawImage(video, 0, 0, 320, 240);
+        });
+
+        // Save captured image
+        saveBtn.addEventListener('click', async () => {
+            const fileName = fileNameInput.value.trim();
+            const imageData = canvas.toDataURL('image/jpeg');
+    
+            if (fileName === "" || imageData === "") {
+                alert('이름을 영문으로 입력해주세요');
+                return;
+            }
+    
+            const blob = await fetch(imageData).then(response => response.blob());
+            const formData = new FormData();
+            formData.append('fileName', fileName);
+            formData.append('image', blob, `${fileName}.jpg`);
+    
+            try {
+                const response = await fetch('/save-image', {
+                    method: 'POST',
+                    body: formData,
+                });
+                if (response.ok) {
+                    alert('이미지가 성공적으로 저장되었습니다.');
+                } else {
+                    alert('이미지 저장 중 오류가 발생했습니다.');
+                }
+            } catch (error) {
+                console.error('Error saving image:', error);
+                alert('이미지 저장 중 오류 발생')
+            }
+        });
+    </script>
+    
+
+</body>
+</html>
